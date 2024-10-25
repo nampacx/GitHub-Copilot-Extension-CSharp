@@ -6,23 +6,46 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Octokit;
 
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.TextToImage;
+using Microsoft.Extensions.Configuration;
+using CsCopilot.DTOs;
+using CsCopilot.Helpers;
+
 namespace Nampacx.Copilot.Function
 {
-    public class BlackbeardFunction
-    {
-        private readonly ILogger<BlackbeardFunction> _logger;
-        private readonly HttpClient _httpClient;
+#pragma warning disable SKEXP0001, SKEXP0010
 
-        public BlackbeardFunction(ILogger<BlackbeardFunction> logger)
+    public class DalleFunction
+    {
+        private readonly ILogger<DalleFunction> _logger;
+        private readonly HttpClient _httpClient;
+        private ITextToImageService textToImage;
+        private BitlyShortUrl bitlyShortUrl;
+
+        public DalleFunction(ILogger<DalleFunction> logger, IConfiguration _configuration)
         {
+
             _logger = logger;
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(@"https://api.githubcopilot.com")
             };
+
+            var builder = Kernel.CreateBuilder();
+            builder.AddAzureOpenAITextToImage(
+                _configuration["TextToImageModel"],
+                _configuration["OpenAIEndpoint"],
+                _configuration["OpenAIKey"]);
+
+            var kernel = builder.Build();
+
+            textToImage = kernel.GetRequiredService<ITextToImageService>();
+
+            bitlyShortUrl = new BitlyShortUrl(_configuration["BitlyToken"]);
         }
 
-        [Function("BlackbeardFunction")]
+        [Function("DalleFunction")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
         {
             // Identify the user, using the GitHub API token provided in the request headers.
@@ -39,9 +62,30 @@ namespace Nampacx.Copilot.Function
             var copilotData = JsonSerializer.Deserialize<CopilotData>(requestBody);
 
             // Insert a special pirate-y system message in our message list.
-            var messages = new List<Message>(copilotData.messages);
-            messages.Insert(0, new Message { role = "system", content = "You are a helpful assistant that replies to user messages as if you were the Blackbeard Pirate." });
-            messages.Insert(0, new Message { role = "system", content = $"Start every response with the user's name, which is @{user.Login}" });
+
+            var message = copilotData.messages.Last();
+
+            var url = await textToImage.GenerateImageAsync(message.content, 1024, 1024);
+
+            url =await bitlyShortUrl.ShortenAsync(url);
+
+            var messages = new List<Message>
+            {
+                new Message
+                {
+                    role = "system",
+                    content =
+                """
+                You are a helpful assistant who supports users generate image using DallE-3.
+                The user will give you a URI and please format it in a ways the user can access it from the chat.
+                """
+                },
+                new Message
+                {
+                    role = "user",
+                    content = $"Image url for '{message.content}' is {url}"
+                }
+            }; 
 
             // Use Copilot's LLM to generate a response to the user's messages, with our extra system messages attached.
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenForUser}");

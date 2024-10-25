@@ -35,10 +35,10 @@
         public List<Message> messages { get; set; }
         public object stop { get; set; }
         public int top_p { get; set; }
-        public int temperature { get; set; }
+        public float temperature { get; set; }
         public int max_tokens { get; set; }
-        public int presence_penalty { get; set; }
-        public int frequency_penalty { get; set; }
+        public float presence_penalty { get; set; }
+        public float frequency_penalty { get; set; }
         public object response_format { get; set; }
         public object copilot_skills { get; set; }
         public string agent { get; set; }
