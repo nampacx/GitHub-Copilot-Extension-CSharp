@@ -9,7 +9,6 @@ using Octokit;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.TextToImage;
 using Microsoft.Extensions.Configuration;
-using CsCopilot.DTOs;
 using CsCopilot.Helpers;
 
 namespace Nampacx.Copilot.Function
@@ -104,7 +103,6 @@ namespace Nampacx.Copilot.Function
             {
                 _logger.LogError($"Copilot LLM response: {copilotLLMResponse.StatusCode} - {response}");
             }
-
             return new OkObjectResult(response);
         }
     }
