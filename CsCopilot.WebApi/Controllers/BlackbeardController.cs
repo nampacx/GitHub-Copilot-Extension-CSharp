@@ -36,16 +36,15 @@ public class BlackbeardController : ControllerBase
             Messages = copilotData.messages.Select(m => new ChatMessage { Content = m.content, Role = m.role }).ToList(),
             Stream = false
         };
-       
+
         chatCompletionsRequest.Messages.Insert(0, new ChatMessage { Role = "system", Content = "You are a helpful assistant that replies to user messages as if you were the Blackbeard Pirate." });
         chatCompletionsRequest.Messages.Insert(0, new ChatMessage { Role = "system", Content = $"Start every response with the user's name, which is @{user.Login}" });
 
         var response = await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest);
         var responseString = await response.ReadAsStringAsync();
 
-       
-       //await Response.SendStreamedResponseAsync(responseString);
-        await Response.SendSSEResponseAsync(responseString, chatCompletionsRequest.Stream);
+        //await Response.SendStreamedResponseAsync(responseString);
+        await Response.SendGitHubLLMResponseAsync(responseString, chatCompletionsRequest.Stream);
 
         await Response.Body.FlushAsync();
     }
