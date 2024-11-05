@@ -1,15 +1,14 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Octokit;
-
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.TextToImage;
-using Microsoft.Extensions.Configuration;
-using CsCopilot.Helpers;
+using Octokit;
+using Shared.DTOs;
+using Shared.Helpers;
+using System.Text.Json;
 
 namespace Nampacx.Copilot.Function
 {
@@ -47,6 +46,7 @@ namespace Nampacx.Copilot.Function
         [Function("DalleFunction")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
         {
+
             // Identify the user, using the GitHub API token provided in the request headers.
             string tokenForUser = req.Headers["X-GitHub-Token"];
             var client = new GitHubClient(new ProductHeaderValue("GitHubCopilotFunction"))

@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace CsCopilot.Helpers
+namespace Shared.Helpers
 {
     public class BitlyShortUrl
     {
@@ -26,10 +26,10 @@ namespace CsCopilot.Helpers
                 var postContent = new { long_url = longUrl };
 
                 httpCLient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                var response = await httpCLient.PostAsync("v4/shorten", 
+                var response = await httpCLient.PostAsync("v4/shorten",
                     new StringContent(JsonSerializer.Serialize(postContent), Encoding.UTF8,
                         "application/json"));
-               
+
                 var stringResponse = await response.Content.ReadAsStringAsync();
                 var bitlyResp = JsonSerializer.Deserialize<bitlyResp>(stringResponse);
                 return bitlyResp.link;
