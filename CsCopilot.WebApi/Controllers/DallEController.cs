@@ -1,11 +1,7 @@
-﻿using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-using Octokit;
-using Microsoft.SemanticKernel;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel.TextToImage;
-using System.Net.Http.Headers;
-using Shared.Helpers;
 using Shared.DTOs;
+using Shared.Helpers;
 using Shared.Helpers.Extensions;
 
 #pragma warning disable SKEXP0001, SKEXP0010

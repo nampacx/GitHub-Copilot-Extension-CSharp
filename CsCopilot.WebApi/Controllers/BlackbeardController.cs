@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Octokit;
 using Shared.DTOs;
 using Shared.Helpers;
-using System.Linq;
-using System.IO;
 using Shared.Helpers.Extensions;
 
 namespace CsCopilot.WebApi.Controllers;
@@ -43,9 +40,8 @@ public class BlackbeardController : ControllerBase
         var response = await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest);
         var responseString = await response.ReadAsStringAsync();
 
-       
-       //await Response.SendStreamedResponseAsync(responseString);
-        await Response.SendSSEResponseAsync(responseString, chatCompletionsRequest.Stream);
+      
+        await Response.SendGitHubLLMResponseAsync(responseString, chatCompletionsRequest.Stream);
 
         await Response.Body.FlushAsync();
     }
