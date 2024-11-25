@@ -42,7 +42,7 @@ public static class MethodInfoExtensions
 
         var parameters = GetFunctionParameters(methodInfo);
 
-        return new FunctionTool(new Function(methodInfo.Name, description, new FunctionParametersDefinition(parameters), methodInfo));
+        return new FunctionTool(new Function(methodInfo.Name, description, new FunctionParametersDefinition(parameters, parameters.Select(p => p.Key).ToList()), methodInfo));
     }
 
 
@@ -60,5 +60,5 @@ public static class MethodInfoExtensions
                 var paramDescription = paramDescriptionAttribute != null ? paramDescriptionAttribute.Description : string.Empty;
                 return (p.Name, Description: paramDescription, Type: p.ParameterType);
             })
-            .ToDictionary(p => p.Name, p => new FunctionParameter(p.Type.Name, p.Description));
+            .ToDictionary(p => p.Name, p => new FunctionParameter(p.Type.Name.ToLowerInvariant(), p.Description));
 }

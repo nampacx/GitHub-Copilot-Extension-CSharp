@@ -41,7 +41,7 @@ public class GitHubLLMClient
     {
         var jsonStrings = SplitIntoJsonStrings(response).ToList();
         var copilotResponse = new List<CopilotResponse>();
-        foreach (var jsonString in jsonStrings.Skip(1).Take(jsonStrings.Count -2))
+        foreach (var jsonString in jsonStrings.Skip(1).Take(jsonStrings.Count - 2))
         {
 
             var cR = JsonSerializer.Deserialize<CopilotResponse>(jsonString);
@@ -117,7 +117,16 @@ public class GitHubLLMClient
 
         var choices = responses.Where(r => r.choices.Any(c => c.delta?.role != null && c.delta?.toolCalls != null));
         return choices.SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));
-            
+
+    }
+
+    public string GetArguments(string llmResponse)
+    {
+        var responses = ParesStringToResponses(llmResponse);
+
+        var choices = responses.Where(r => r.choices.Any(c => c.delta.toolCalls != null)).ToList();
+        var functions = choices.SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function.arguments))).ToList();
+        return string.Join("", functions);
     }
 }
 

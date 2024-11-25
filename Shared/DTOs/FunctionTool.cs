@@ -43,9 +43,10 @@ public record Function
 
 public record FunctionParametersDefinition
 {
-    public FunctionParametersDefinition(Dictionary<string, FunctionParameter> properties)
+    public FunctionParametersDefinition(Dictionary<string, FunctionParameter> properties, List<string> required)
     {
         Properties = properties;
+        Required = required;
     }
 
     [JsonPropertyName("type")]

@@ -49,13 +49,15 @@ public class FunctionCallingController : ControllerBase
                 Content = "You are a helpful assistant that helps users manage their files."
             });
 
+        var ser = JsonSerializer.Serialize(chatCompletionsRequest);
+
         var responseString = string.Empty;
 
         for (int i = 0; i < 5; i++)
         {
             responseString = await (await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest)).ReadAsStringAsync();
 
-            var functionsToCall = _gitHubLLMClient.GetFunctionsToCall(responseString);
+            var functionsToCall = _gitHubLLMClient.GetFunctionsToCall(responseString).ToList();
             if(!functionsToCall.Any())
             {
                 break;
