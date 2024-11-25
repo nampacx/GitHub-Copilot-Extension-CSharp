@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Shared.Helpers;
@@ -36,6 +37,29 @@ public class GitHubLLMClient
         return copilotLLMResponse;
     }
 
+    public IEnumerable<CopilotResponse> ParesStringToResponses(string response)
+    {
+        var jsonStrings = SplitIntoJsonStrings(response).ToList();
+        var copilotResponse = new List<CopilotResponse>();
+        foreach (var jsonString in jsonStrings.Skip(1).Take(jsonStrings.Count -2))
+        {
+
+            var cR = JsonSerializer.Deserialize<CopilotResponse>(jsonString);
+            if (cR != null)
+            {
+                copilotResponse.Add(cR);
+            }
+        }
+
+        return copilotResponse;
+    }
+
+    private static IEnumerable<string> SplitIntoJsonStrings(string input)
+    {
+        var splits = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+        return splits.Select(s => s.TrimStart("data:".ToCharArray()).Trim());
+    }
 
     public async Task<HttpContent> ChatCompletionsAsync(string apiKey, ChatCompletionsRequest request, string integrationID = null)
     {
@@ -85,6 +109,15 @@ public class GitHubLLMClient
 
         var responseContent = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<EmbeddingsResponse>(responseContent);
+    }
+
+    public IEnumerable<CopilotFunction> GetFunctionsToCall(string data)
+    {
+        var responses = ParesStringToResponses(data);
+
+        return responses.Where(r => r.choices.Any(c => c.delta?.role != null))
+             .SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));
+            
     }
 }
 

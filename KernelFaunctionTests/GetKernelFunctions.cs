@@ -10,7 +10,7 @@ public class GetKernelFunctions
     [Fact]
     public void GetKernelFunctionMethodsTest()
     {
-        var methods = ToolsExtractorService.GetKernelFunctionMethods(typeof(FilesPlugin));
+        var methods = ToolsExtractor.GetKernelFunctionMethods(typeof(FilesPlugin));
 
         methods.Should().HaveCount(4);
     }
@@ -18,7 +18,7 @@ public class GetKernelFunctions
     [Fact]
     public void GetAllFunctionToolsFromType()
     {
-        var methods = ToolsExtractorService.GetAllFunctionTools(typeof(FilesPlugin));
+        var methods = ToolsExtractor.GetAllFunctionTools(typeof(FilesPlugin));
 
         methods.Should().HaveCount(4);
     }
@@ -26,7 +26,7 @@ public class GetKernelFunctions
     [Fact]
     public void GetFunctionWithDescriptionOfMethodInfo()
     {
-        var method = ToolsExtractorService.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
+        var method = ToolsExtractor.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
 
         var functionTool = method.ToFunctionTool();
 
@@ -36,7 +36,7 @@ public class GetKernelFunctions
     [Fact]
     public void GetFunctionWithParametersOfMethodInfo()
     {
-        var method = ToolsExtractorService.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
+        var method = ToolsExtractor.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
 
         var functionTool = method.ToFunctionTool();
 
@@ -46,7 +46,7 @@ public class GetKernelFunctions
     [Fact]
     public void GetFunctionToolJson()
     {
-        var method = ToolsExtractorService.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
+        var method = ToolsExtractor.GetKernelFunctionMethods(typeof(FilesPlugin)).FirstOrDefault();
 
         var functionTool = method.ToFunctionTool();
 

@@ -1,4 +1,6 @@
-﻿namespace Shared.DTOs;
+﻿using System.Text.Json.Serialization;
+
+namespace Shared.DTOs;
 
 public class CopilotChoice
 {
@@ -11,8 +13,25 @@ public class CopilotChoice
 public class CopilotDelta
 {
     public string role { get; set; }
-    public string content { get; set; }
+
+    [JsonPropertyName("tool_calls")]
+    public List<CopilotToolCall> toolCalls { get; set; }
 }
+
+public class CopilotToolCall
+{
+    public CopilotFunction function { get; set; }
+    public string id { get; set; }
+    public int index { get; set; }
+    public string type { get; set; }
+}
+
+public class CopilotFunction
+{
+    public string arguments { get; set; }
+    public string name { get; set; }
+}
+
 
 public class CopilotResponse
 {

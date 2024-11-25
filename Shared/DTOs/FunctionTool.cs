@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
+using System.Text.Json.Serialization;
 
 namespace Shared.DTOs;
 
@@ -18,12 +20,16 @@ public record FunctionTool
 
 public record Function
 {
-    public Function(string name, string description, FunctionParametersDefinition parameters)
+    public Function(string name, string description, FunctionParametersDefinition parameters, MethodInfo methodInfo)
     {
         Name = name;
         Description = description;
         Parameters = parameters;
+        MethodInfo = methodInfo;
     }
+
+    [JsonIgnore]
+    public MethodInfo MethodInfo{ get; set; }
 
     [JsonPropertyName("name")]
     public string Name { get; set; }
@@ -39,17 +45,17 @@ public record FunctionParametersDefinition
 {
     public FunctionParametersDefinition(Dictionary<string, FunctionParameter> properties)
     {
-        //Properties = properties;
+        Properties = properties;
     }
 
     [JsonPropertyName("type")]
     public string Type { get; set; } = "object";
 
-    //[JsonPropertyName("properties")]
-    //public Dictionary<string, FunctionParameter> Properties { get; set; }
+    [JsonPropertyName("properties")]
+    public Dictionary<string, FunctionParameter> Properties { get; set; }
 
-    //[JsonPropertyName("required")]
-    //public List<string> Required { get; set; } = new List<string>();
+    [JsonPropertyName("required")]
+    public List<string> Required { get; set; } = new List<string>();
 }
 
 public record FunctionParameter

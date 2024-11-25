@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace SemanticKernel.ToolsExtractor;
 
-public class ToolsExtractorService
+public class ToolsExtractor
 {
     public static MethodInfo[] GetKernelFunctionMethods(Type type)
     {
@@ -37,7 +37,7 @@ public static class MethodInfoExtensions
 
         var parameters = GetFunctionParameters(methodInfo);
 
-        return new FunctionTool(new Function(methodInfo.Name, description, new FunctionParametersDefinition(parameters)));
+        return new FunctionTool(new Function(methodInfo.Name, description, new FunctionParametersDefinition(parameters), methodInfo));
     }
 
 
