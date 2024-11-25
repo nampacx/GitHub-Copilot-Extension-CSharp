@@ -115,8 +115,8 @@ public class GitHubLLMClient
     {
         var responses = ParesStringToResponses(llmResponse);
 
-        return responses.Where(r => r.choices.Any(c => c.delta?.role != null))
-             .SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));
+        var choices = responses.Where(r => r.choices.Any(c => c.delta?.role != null && c.delta?.toolCalls != null));
+        return choices.SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));
             
     }
 }

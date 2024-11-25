@@ -11,7 +11,7 @@ namespace Nampacx.Copilot.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FunctionCallingController: ControllerBase
+public class FunctionCallingController : ControllerBase
 {
     private readonly ILogger<FunctionCallingController> _logger;
     private readonly GitHubLLMClient _gitHubLLMClient;
@@ -42,36 +42,40 @@ public class FunctionCallingController: ControllerBase
             Tools = _functionCallingService.Tools
         };
 
-        chatCompletionsRequest.Messages.Insert(0, 
-            new ChatMessage { 
-                Role = "system", 
-                Content = "You are a helpful assistant that helps users manage their files." 
-            });
-
-        var ser = JsonSerializer.Serialize(chatCompletionsRequest);
-
-        var response = await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest);
-        var responseString = await response.ReadAsStringAsync();
-
-        var functionsToCall = _gitHubLLMClient.GetFunctionsToCall(responseString);
-
-        foreach (var function in functionsToCall)
-        {
-            var result = _functionCallingService.Execute(function);
-
-            var newMessage = new ChatMessage
+        chatCompletionsRequest.Messages.Insert(0,
+            new ChatMessage
             {
                 Role = "system",
-                Content = $"""
-                The function: {function.name} returned: {result}
-                """
-            };
+                Content = "You are a helpful assistant that helps users manage their files."
+            });
 
-            chatCompletionsRequest.Messages.Add(newMessage);
+        var responseString = string.Empty;
+
+        for (int i = 0; i < 5; i++)
+        {
+            responseString = await (await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest)).ReadAsStringAsync();
+
+            var functionsToCall = _gitHubLLMClient.GetFunctionsToCall(responseString);
+            if(!functionsToCall.Any())
+            {
+                break;
+            }
+
+            foreach (var function in functionsToCall)
+            {
+                var result = _functionCallingService.Execute(function);
+
+                var newMessage = new ChatMessage
+                {
+                    Role = "system",
+                    Content = $"""
+                                The function: {function.name} returned: {result}
+                              """
+                };
+
+                chatCompletionsRequest.Messages.Add(newMessage);
+            }
         }
-
-        response = await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest);
-        responseString = await response.ReadAsStringAsync();
 
         await Response.SendGitHubLLMResponseAsync(responseString, chatCompletionsRequest.Stream);
 
@@ -79,4 +83,4 @@ public class FunctionCallingController: ControllerBase
     }
 
 
-}   
+}
