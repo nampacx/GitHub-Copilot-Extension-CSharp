@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsCopilot.WebApi", "CsCopilot.WebApi\CsCopilot.WebApi.csproj", "{1DD10B90-1B6C-4722-A580-E97BF495ABD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nampacx.Copilot.WebApi", "CsCopilot.WebApi\Nampacx.Copilot.WebApi.csproj", "{1DD10B90-1B6C-4722-A580-E97BF495ABD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{416C7A0E-0E45-4E95-98B1-7B24DA7DF929}"
 EndProject

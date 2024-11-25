@@ -6,7 +6,7 @@ using System.Linq;
 using System.IO;
 using Shared.Helpers.Extensions;
 
-namespace CsCopilot.WebApi.Controllers;
+namespace Nampacx.Copilot.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

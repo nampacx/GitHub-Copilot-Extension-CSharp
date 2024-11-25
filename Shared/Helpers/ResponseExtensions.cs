@@ -17,7 +17,10 @@ namespace Shared.Helpers
             {
                 await httpResponse.WriteAsync(message);
             }
-            await httpResponse.WriteAsync($"data: {message}\n\n");
+            else
+            {
+                await httpResponse.WriteAsync($"data: {message}\n\n");
+            }
         }
 
         public static async Task SendAsSSEResponseAsync(this HttpResponse httpResponse, string message)

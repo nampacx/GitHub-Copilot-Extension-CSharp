@@ -16,19 +16,7 @@ public sealed class FilesPlugin
             Console.WriteLine($"Called by: {caller}");
     }
 
-    [KernelFunction, Description("Reads all text from a file.")]
-    public string ReadFileContent([Description("Path to the file")] string filePath)
-    {
-        ReportCalling();
-
-        if (filePath is null or "")
-        {
-            return $"Error reading file {filePath} Please provide a file path to read the content.";
-        }
-
-        return File.ReadAllText(filePath);
-    }
-
+  
 
     [KernelFunction, Description("Takes some string content and writes it to a given file path.")]
     public string WriteFileContent([Description("Path to the file")] string filePath, [Description("Content to write")] string content)
@@ -65,6 +53,20 @@ public sealed class FilesPlugin
             return $"Error writing to file {filePath}: {ex.Message}";
         }
     }
+
+    [KernelFunction, Description("Reads all text from a file.")]
+    public string ReadFileContent([Description("Path to the file")] string filePath)
+    {
+        ReportCalling();
+
+        if (filePath is null or "")
+        {
+            return $"Error reading file {filePath} Please provide a file path to read the content.";
+        }
+
+        return File.ReadAllText(filePath);
+    }
+
 
     [KernelFunction, Description("List all files in a given directory.")]
     public string[] ListFilesForGivenDirectory([Description("Directory path")] string directoryPath)
