@@ -56,7 +56,7 @@ public class GitHubLLMClient
 
     private static IEnumerable<string> SplitIntoJsonStrings(string input)
     {
-        var splits = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var splits = input.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         return splits.Select(s => s.TrimStart("data:".ToCharArray()).Trim());
     }
@@ -111,9 +111,9 @@ public class GitHubLLMClient
         return JsonSerializer.Deserialize<EmbeddingsResponse>(responseContent);
     }
 
-    public IEnumerable<CopilotFunction> GetFunctionsToCall(string data)
+    public IEnumerable<CopilotFunction> GetFunctionsToCall(string llmResponse)
     {
-        var responses = ParesStringToResponses(data);
+        var responses = ParesStringToResponses(llmResponse);
 
         return responses.Where(r => r.choices.Any(c => c.delta?.role != null))
              .SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));

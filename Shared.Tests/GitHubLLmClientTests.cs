@@ -18,7 +18,6 @@ public class GitHubLLmClientTests
         responses.Count().Should().Be(3);
     }
 
-
     [Fact]
     public void GetFunctionsToCall()
     {

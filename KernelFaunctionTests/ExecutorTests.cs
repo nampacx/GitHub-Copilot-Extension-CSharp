@@ -19,7 +19,7 @@ public class ExecutorTests
 
         var methodInfo = methods.LastOrDefault();
 
-        var response = ToolExecution.ExecuteFunction(methodInfo);
+        var response = ToolInvoker.InvokeMethod(methodInfo);
 
         response.Should().NotBeNull();
     }
@@ -31,7 +31,7 @@ public class ExecutorTests
 
         var lastTool = tools.LastOrDefault();
 
-        var response = ToolExecution.ExecuteFunction(lastTool);
+        var response = ToolInvoker.InvokeFunctionTool(lastTool);
 
         response.Should().NotBeNull();
     }

@@ -27,6 +27,11 @@ public class ToolsExtractor
             yield return method.ToFunctionTool();
         }
     }
+
+    public static IEnumerable<FunctionTool> GetAllFunctionTools<T>()
+    {
+        return GetAllFunctionTools(typeof(T));
+    }
 }
 
 public static class MethodInfoExtensions

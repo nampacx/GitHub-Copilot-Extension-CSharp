@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace SemanticKernel.Connector
 {
-    public class ToolExecution
+    public class ToolInvoker
     {
-        public static object ExecuteFunction(MethodInfo methodInfo)
+        public static object InvokeMethod(MethodInfo methodInfo)
         {
             var instance = Activator.CreateInstance(methodInfo.DeclaringType);
 
             return methodInfo.Invoke(instance, null);
         }
 
-        public static object ExecuteFunction(FunctionTool functionTool)
+        public static object InvokeFunctionTool(FunctionTool functionTool)
         {
             var methodInfo = functionTool.Function.MethodInfo;
 
