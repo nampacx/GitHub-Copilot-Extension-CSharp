@@ -4,42 +4,72 @@ namespace Shared.DTOs;
 
 public class CopilotChoice
 {
-    public int index { get; set; }
-    public CopilotDelta delta { get; set; }
-    public object logprobs { get; set; }
-    public object finish_reason { get; set; }
+    [JsonPropertyName("index")]
+    public int Index { get; set; }
+
+    [JsonPropertyName("delta")]
+    public CopilotDelta Delta { get; set; }
+
+    [JsonPropertyName("logprobs")]
+    public object Logprobs { get; set; }
+
+    [JsonPropertyName("finish_reason")]
+    public object FinishReason { get; set; }
 }
 
 public class CopilotDelta
 {
-    public string role { get; set; }
+    [JsonPropertyName("role")]
+    public string Role { get; set; }
 
     [JsonPropertyName("tool_calls")]
-    public List<CopilotToolCall> toolCalls { get; set; }
+    public List<CopilotToolCall> Tools { get; set; }
 }
 
 public class CopilotToolCall
 {
-    public CopilotFunction function { get; set; }
-    public string id { get; set; }
-    public int index { get; set; }
-    public string type { get; set; }
+    [JsonPropertyName("function")]
+    public CopilotFunction Function { get; set; }
+
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("index")]
+    public int Index { get; set; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 }
 
 public class CopilotFunction
 {
-    public string arguments { get; set; }
-    public string name { get; set; }
+    [JsonPropertyName("arguments")]
+    public string Arguments { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+
+    [JsonIgnore]
+    public Dictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 }
 
 
 public class CopilotResponse
 {
-    public string id { get; set; } = "chatcmpl-123";
+    [JsonPropertyName("Id")]
+    public string Id { get; set; } = "chatcmpl-123";
+
+
     public string @object { get; set; }
-    public long created { get; set; } = DateTime.Now.Ticks;
-    public string model { get; set; } = "gpt-3.5-turbo-0125";
-    public string system_fingerprint { get; set; } = "fp_44709d6fcb";
-    public List<CopilotChoice> choices { get; set; }
+
+    [JsonPropertyName("created")]
+    public long Created { get; set; } = DateTime.Now.Ticks;
+    [JsonPropertyName("model")]
+    public string Model { get; set; } = "gpt-3.5-turbo-0125";
+    [JsonPropertyName("system_fingerprint")]
+    public string SystemFingerprint { get; set; } = "fp_44709d6fcb";
+
+    [JsonPropertyName("choices")]
+    public List<CopilotChoice> Choices { get; set; }
 }
 

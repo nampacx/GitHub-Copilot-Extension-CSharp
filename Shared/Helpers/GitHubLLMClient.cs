@@ -1,4 +1,5 @@
-﻿using Shared.DTOs;
+﻿using Newtonsoft.Json.Linq;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,22 +112,33 @@ public class GitHubLLMClient
         return JsonSerializer.Deserialize<EmbeddingsResponse>(responseContent);
     }
 
-    public IEnumerable<CopilotFunction> GetFunctionsToCall(string llmResponse)
+    public CopilotFunction GetFunctionsToCall(string llmResponse)
     {
         var responses = ParesStringToResponses(llmResponse);
 
-        var choices = responses.Where(r => r.choices.Any(c => c.delta?.role != null && c.delta?.toolCalls != null));
-        return choices.SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function)));
+        var choices = responses.Where(r => r.Choices.Any(c => c.Delta?.Role != null && c.Delta?.Tools != null));
+        var function = choices.SelectMany(r => r.Choices.SelectMany(c => c.Delta.Tools.Select(tC => tC.Function))).SingleOrDefault();
 
+        if(function == null)
+        {
+            return null;
+        }
+
+        var parameters = GetArguments(llmResponse);
+        function.Parameters = parameters;
+        return function;
     }
 
-    public string GetArguments(string llmResponse)
+    public Dictionary<string,object> GetArguments(string llmResponse)
     {
         var responses = ParesStringToResponses(llmResponse);
 
-        var choices = responses.Where(r => r.choices.Any(c => c.delta.toolCalls != null)).ToList();
-        var functions = choices.SelectMany(r => r.choices.SelectMany(c => c.delta.toolCalls.Select(tC => tC.function.arguments))).ToList();
-        return string.Join("", functions);
+        var choices = responses.Where(r => r.Choices.Any(c => c.Delta.Tools != null)).ToList();
+        var functions = choices.SelectMany(r => r.Choices.SelectMany(c => c.Delta.Tools.Select(tC => tC.Function.Arguments))).ToList();
+        var argumentsJson = string.Join("", functions);
+
+        var jObject = JObject.Parse(argumentsJson);
+        return jObject.Properties().ToDictionary(p => p.Name, p => p.Value.ToObject<dynamic>() as object);
     }
 }
 

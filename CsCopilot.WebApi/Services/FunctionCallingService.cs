@@ -17,18 +17,30 @@ public class FunctionCallingService
 
     public void RegisterTool<T>()
     {
-       Tools.AddRange(ToolsExtractor.GetAllFunctionTools<T>());
+        Tools.AddRange(ToolsExtractor.GetAllFunctionTools<T>());
     }
 
     public string Execute(FunctionTool functionTool)
     {
-       return JsonSerializer.Serialize(ToolInvoker.InvokeFunctionTool(functionTool));
+        return JsonSerializer.Serialize(ToolInvoker.InvokeFunctionTool(functionTool));
+    }
+
+    public string Execute(FunctionTool functionTool, Dictionary<string, object> parameters)
+    {
+        return JsonSerializer.Serialize(ToolInvoker.InvokeFunctionTool(functionTool, parameters));
     }
 
     public string Execute(CopilotFunction copilotFunction)
     {
-        var tool = Tools.FirstOrDefault(t => t.Function.Name == copilotFunction.name);
+        var tool = Tools.FirstOrDefault(t => t.Function.Name == copilotFunction.Name);
 
-        return Execute(tool);
+        if (copilotFunction.Parameters.Count == 0)
+        {
+            return Execute(tool);
+        }
+        else
+        {
+            return Execute(tool, copilotFunction.Parameters);
+        }
     }
 }

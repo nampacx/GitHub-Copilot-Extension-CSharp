@@ -25,5 +25,14 @@ namespace SemanticKernel.Connector
 
             return methodInfo.Invoke(instance, null);
         }
+
+        public static object InvokeFunctionTool(FunctionTool functionTool, Dictionary<string, object> parameters)
+        {
+            var methodInfo = functionTool.Function.MethodInfo;
+
+            var instance = Activator.CreateInstance(methodInfo.DeclaringType);
+
+            return methodInfo.Invoke(instance, parameters.Values.ToArray());
+        }
     }
 }

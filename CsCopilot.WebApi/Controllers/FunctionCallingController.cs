@@ -57,26 +57,23 @@ public class FunctionCallingController : ControllerBase
         {
             responseString = await (await _gitHubLLMClient.ChatCompletionsAsync(tokenForUser, chatCompletionsRequest)).ReadAsStringAsync();
 
-            var functionsToCall = _gitHubLLMClient.GetFunctionsToCall(responseString).ToList();
-            if(!functionsToCall.Any())
+            var function = _gitHubLLMClient.GetFunctionsToCall(responseString);
+            if (function == null)
             {
                 break;
             }
 
-            foreach (var function in functionsToCall)
+            var result = _functionCallingService.Execute(function);
+
+            var newMessage = new ChatMessage
             {
-                var result = _functionCallingService.Execute(function);
-
-                var newMessage = new ChatMessage
-                {
-                    Role = "system",
-                    Content = $"""
-                                The function: {function.name} returned: {result}
+                Role = "system",
+                Content = $"""
+                                The function: {function.Name} returned: {result}
                               """
-                };
+            };
 
-                chatCompletionsRequest.Messages.Add(newMessage);
-            }
+            chatCompletionsRequest.Messages.Add(newMessage);
         }
 
         await Response.SendGitHubLLMResponseAsync(responseString, chatCompletionsRequest.Stream);

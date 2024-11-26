@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using Shared.DTOs;
 using Shared.Helpers;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -27,41 +26,63 @@ public class GitHubLLmClientTests
 
         var gitHubLLmClient = new GitHubLLMClient();
 
-        var responses = gitHubLLmClient.GetFunctionsToCall(data);
+        var function = gitHubLLmClient.GetFunctionsToCall(data);
 
-        responses.Should().BeEmpty();
+        function.Should().BeNull();
     }
 
     [Fact]
-    public void FunctionWithArguments()
+    public void Parse_Arguments()
     {
+        var pathKey = "directoryPath";
         var data = File.ReadAllText("./Files/functionarguments.txt").Replace(Environment.NewLine, "\n"); ;
 
         var gitHubLLmClient = new GitHubLLMClient();
 
         var responses = gitHubLLmClient.GetArguments(data);
-        var jObject = JObject.Parse(responses);
-        var dict = jObject.Properties().ToDictionary(p => p.Name, p => p.Value);
 
-        dict.Keys.Should().Contain("directoryPath");
+        responses.Keys.Should().Contain(pathKey);
     }
 
- 
+    [Fact]
+    public void Parse_FunctionWithArguments()
+    {
+        var pathKey = "directoryPath";
+        var data = File.ReadAllText("./Files/functionarguments.txt").Replace(Environment.NewLine, "\n"); ;
+
+        var gitHubLLmClient = new GitHubLLMClient();
+
+        var function = gitHubLLmClient.GetFunctionsToCall(data);
+        function.Parameters.Should().NotBeEmpty();
+        function.Parameters.Keys.Should().Contain(pathKey);
+    }
 
     [Fact]
-    public void GetFunctionsToCall()
+    public void Parse_ListFilesInCurrentDirectory()
     {
         var data = File.ReadAllText("./Files/data.txt").Replace(Environment.NewLine, "\n"); ;
         var function = new CopilotFunction()
         {
-            arguments = null,
-            name = "ListFilesInCurrentDirectory"
+            Arguments = null,
+            Name = "ListFilesInCurrentDirectory"
         };
 
         var gitHubLLmClient = new GitHubLLMClient();
 
         var responses = gitHubLLmClient.GetFunctionsToCall(data);
 
-        responses.Last().name.Should().Be(function.name);
+        responses.Name.Should().Be(function.Name);
+    }
+
+    [Fact]
+    public void Parse_ListFilesInCurrentDirectory_NoArguments()
+    {
+        var data = File.ReadAllText("./Files/data.txt").Replace(Environment.NewLine, "\n"); ;
+
+        var gitHubLLmClient = new GitHubLLMClient();
+
+        var arguments = gitHubLLmClient.GetArguments(data);
+
+        arguments.Should().BeEmpty();
     }
 }
