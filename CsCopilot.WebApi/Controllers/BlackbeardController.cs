@@ -36,7 +36,6 @@ public class BlackbeardController : ControllerBase
             Messages = copilotData.messages.Select(m => new ChatMessage { Content = m.content, Role = m.role }).ToList(),
             Stream = false
         };
-
         chatCompletionsRequest.Messages.Insert(0, new ChatMessage { Role = "system", Content = "You are a helpful assistant that replies to user messages as if you were the Blackbeard Pirate." });
         chatCompletionsRequest.Messages.Insert(0, new ChatMessage { Role = "system", Content = $"Start every response with the user's name, which is @{user.Login}" });
 
