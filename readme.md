@@ -1,4 +1,4 @@
-# GitHub Copilot Extension for C#
+# GitHub Copilot Extension C#
 
 This repository is a "fork" of the official GitHub Copilot agent demo, reimplemented as an Azure Function using C#.
 
