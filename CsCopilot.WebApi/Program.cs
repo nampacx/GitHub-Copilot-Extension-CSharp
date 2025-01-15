@@ -1,5 +1,6 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.TextToImage;
+using Nampacx.Copilot.WebApi.Services;
 using Shared.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddLogging(b => b.AddConsole());
 
 builder.Services.AddSingleton<GitHubLLMClient>();
+builder.Services.AddSingleton<FunctionCallingService>();
 
 #pragma warning disable SKEXP0001, SKEXP0010
 builder.Services.AddSingleton(b =>

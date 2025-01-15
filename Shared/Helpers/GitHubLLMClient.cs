@@ -1,11 +1,14 @@
-﻿using Shared.DTOs;
+﻿using Newtonsoft.Json.Linq;
+using Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Shared.Helpers;
@@ -35,13 +38,36 @@ public class GitHubLLMClient
         return copilotLLMResponse;
     }
 
+    public IEnumerable<CopilotResponse> ParesStringToResponses(string response)
+    {
+        var jsonStrings = SplitIntoJsonStrings(response).ToList();
+        var copilotResponse = new List<CopilotResponse>();
+        foreach (var jsonString in jsonStrings.Skip(1).Take(jsonStrings.Count - 2))
+        {
+
+            var cR = JsonSerializer.Deserialize<CopilotResponse>(jsonString);
+            if (cR != null)
+            {
+                copilotResponse.Add(cR);
+            }
+        }
+
+        return copilotResponse;
+    }
+
+    private static IEnumerable<string> SplitIntoJsonStrings(string input)
+    {
+        var splits = input.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        return splits.Select(s => s.TrimStart("data:".ToCharArray()).Trim());
+    }
 
     public async Task<HttpContent> ChatCompletionsAsync(string apiKey, ChatCompletionsRequest request, string integrationID = null)
     {
         var body = JsonSerializer.Serialize(request);
         var content = new StringContent(body, Encoding.UTF8, "application/json");
 
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         if (!string.IsNullOrEmpty(integrationID))
         {
@@ -85,6 +111,35 @@ public class GitHubLLMClient
         var responseContent = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<EmbeddingsResponse>(responseContent);
     }
+
+    public CopilotFunction GetFunctionsToCall(string llmResponse)
+    {
+        var responses = ParesStringToResponses(llmResponse);
+
+        var choices = responses.Where(r => r.Choices.Any(c => c.Delta?.Role != null && c.Delta?.Tools != null));
+        var function = choices.SelectMany(r => r.Choices.SelectMany(c => c.Delta.Tools.Select(tC => tC.Function))).SingleOrDefault();
+
+        if(function == null)
+        {
+            return null;
+        }
+
+        var parameters = GetArguments(llmResponse);
+        function.Parameters = parameters;
+        return function;
+    }
+
+    public Dictionary<string,object> GetArguments(string llmResponse)
+    {
+        var responses = ParesStringToResponses(llmResponse);
+
+        var choices = responses.Where(r => r.Choices.Any(c => c.Delta.Tools != null)).ToList();
+        var functions = choices.SelectMany(r => r.Choices.SelectMany(c => c.Delta.Tools.Select(tC => tC.Function.Arguments))).ToList();
+        var argumentsJson = string.Join("", functions);
+
+        var jObject = JObject.Parse(argumentsJson);
+        return jObject.Properties().ToDictionary(p => p.Name, p => p.Value.ToObject<dynamic>() as object);
+    }
 }
 
 public class ChatRequest
@@ -119,6 +174,9 @@ public class ChatCompletionsRequest
 
     [JsonPropertyName("stream")]
     public bool Stream { get; set; }
+
+    [JsonPropertyName("tools")]
+    public List<FunctionTool> Tools { get; set; }
 }
 
 public class EmbeddingsRequest

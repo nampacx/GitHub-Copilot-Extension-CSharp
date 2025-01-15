@@ -10,49 +10,48 @@ using Shared.Helpers.Extensions;
 
 #pragma warning disable SKEXP0001, SKEXP0010
 
-namespace Nampacx.Copilot.WebAPI.Controllers
+namespace Nampacx.Copilot.WebApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class DalleController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DalleController : ControllerBase
+    private readonly ILogger<DalleController> _logger;
+    private readonly ITextToImageService _textToImage;
+
+    public DalleController(ILogger<DalleController> logger, ITextToImageService textToImageService)
     {
-        private readonly ILogger<DalleController> _logger;
-        private readonly ITextToImageService _textToImage;
+        _logger = logger;
+        _textToImage = textToImageService;
+    }
 
-        public DalleController(ILogger<DalleController> logger,ITextToImageService textToImageService)
+    [HttpPost]
+    public async Task GenerateImage([FromHeader(Name = "X-GitHub-Token")] string tokenForUser, [FromBody] CopilotData copilotData)
+    {
+        Response.ContentType = "text/event-stream";
+
+        var user = await tokenForUser.GetUser();
+        _logger.LogInformation($"User: {user.Login}");
+
+        var response = string.Empty;
+        // Insert a special pirate-y system message in our message list.
+        try
         {
-            _logger = logger;
-            _textToImage = textToImageService;
+            var message = copilotData.messages.Last();
+
+            await Response.SendAsSSEResponseAsync("Generating image");
+
+            var url = await _textToImage.GenerateImageAsync(message.content, 1024, 1024);
+            response = $"""
+                <a href="{url}"> image </a>
+                """;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error generating image");
+            response = "Error generating image!";
         }
 
-        [HttpPost]
-        public async Task GenerateImage([FromHeader(Name = "X-GitHub-Token")] string tokenForUser, [FromBody] CopilotData copilotData)
-        {
-            Response.ContentType = "text/event-stream";
-
-            var user = await tokenForUser.GetUser();
-            _logger.LogInformation($"User: {user.Login}");
-
-            var response = string.Empty;
-            // Insert a special pirate-y system message in our message list.
-            try
-            {
-                var message = copilotData.messages.Last();
-
-               await Response.SendAsSSEResponseAsync("Generating image");
-
-                var url = await _textToImage.GenerateImageAsync(message.content, 1024, 1024);
-                response = $"""
-                    <a href="{url}"> image </a>
-                    """;
-            }
-            catch(Exception e)
-            {
-                _logger.LogError(e, "Error generating image");
-                response = "Error generating image!";
-            }
-
-            await Response.SendAsSSEResponseAsync(response);
-        }
+        await Response.SendAsSSEResponseAsync(response);
     }
 }
